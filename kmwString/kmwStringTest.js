@@ -1,8 +1,65 @@
-/* kmwStringTest.js: test the surrogate pair handling string functions */
+﻿/* kmwStringTest.js: test the surrogate pair handling string functions */
 
 // TODO: test isolated surrogates as well as correct pairs
 // TODO: test edge cases as per ECMAscript standard.
 // This is currently pretty piecemeal.  But I think it gets us over the line
+
+
+/*------------------------------------------------------------------------------------------*/
+/* kmwCodePointToCodeUnit test                                                                     */
+/*------------------------------------------------------------------------------------------*/
+
+head('kmwCodePointToCodeUnit');
+    var strBMP="Brave new world";
+    var strSMP="Brave 𓀧𓅌𓂜 world";
+
+print('strSMP', strSMP);
+print('strBMP.kmwCodePointToCodeUnit(9)', '9');
+print('strSMP.kmwCodePointToCodeUnit(8)', '10');
+print('strSMP.kmwCodePointToCodeUnit(9)', '12');
+print('strSMP.kmwCodePointToCodeUnit(10)', '13');
+
+/*------------------------------------------------------------------------------------------*/
+/* kmwCodeUnitToCodePoint test                                                                     */
+/*------------------------------------------------------------------------------------------*/
+
+head('kmwCodeUnitToCodePoint');
+    var strBMP="Brave new world";
+    var strSMP="Brave 𓀧𓅌𓂜 world";
+print('strSMP', strSMP);
+print('strBMP.kmwCodeUnitToCodePoint(9)', '9');
+print('strSMP.kmwCodeUnitToCodePoint(10)', '8');
+print('strSMP.kmwCodeUnitToCodePoint(11)', '9');
+print('strSMP.kmwCodeUnitToCodePoint(12)', '9');
+print('strSMP.kmwCodeUnitToCodePoint(13)', '10');
+print('strSMP.kmwCodeUnitToCodePoint(-8)','7');
+print('strSMP.kmwCodeUnitToCodePoint(-9)','8');
+print('strSMP.kmwCodeUnitToCodePoint(-10)','8');
+print('strSMP.kmwCodeUnitToCodePoint(-11)','9');
+print('strSMP.kmwCodeUnitToCodePoint(-12)','9');
+
+
+/*------------------------------------------------------------------------------------------*/
+/* kmwCharAt test                                                                       */
+/*------------------------------------------------------------------------------------------*/
+
+head('kmwCharAt');
+
+    var strBMP="Brave new world";
+    var strSMP="Brave 𓀧𓅌𓂜 world";
+	
+	print('strSMP', strSMP);
+	
+	print('strBMP.charAt(6)', 'n');
+
+	print('strBMP.charAt(-1)', '');
+	print('strBMP.kmwCharAt(-1)', '');
+	
+	print('strSMP.kmwCharAt(4)', 'e');
+	print('strSMP.kmwCharAt(6)', '𓀧');
+	print('strSMP.kmwCharAt(7)', '𓅌');
+	print('strSMP.kmwCharAt(8)', '𓂜');
+	print('strSMP.kmwCharAt(10)', 'w');
 
 /*------------------------------------------------------------------------------------------*/
 /* kmwFromCharCode test                                                                     */
@@ -22,6 +79,7 @@ head('kmwCharCodeAt');
 
     var strBMP="Brave new world";
     var strSMP="Brave 𓀧𓅌𓂜 world";
+	//var strSMP="Brave"+String.fromCharCode(0xD801)+"𓀧𓅌𓂜 world";
 	
 	print('strSMP', strSMP);
 	
@@ -139,6 +197,10 @@ print('str.substr(-3)', "hij");
 print('str.kmwSubstr(-3)', "hij");
 print('str.substr(1)', "bcdefghij");
 print('str.kmwSubstr(1)', "bcdefghij");
+print('str.substr(9)', "j");
+print('str.kmwSubstr(9)', "j");
+print('str.substr(10)', "");
+print('str.kmwSubstr(10)', "");
 print('str.substr(-20,2)', "ab");
 print('str.kmwSubstr(-20,2)', "ab");
 print('str.substr(20,2)', "");
@@ -151,6 +213,9 @@ print('strSupp.kmwSubstr(-3)', "hij");
 print('strSupp.kmwSubstr(1)', "bc𓀧𓅌𓂜ghij");
 print('strSupp.kmwSubstr(-20,2)', "ab");
 print('strSupp.kmwSubstr(20,2)', "");
+print('strSupp.kmwSubstr(-6)', "𓅌𓂜ghij");
+print('strSupp.kmwSubstr(-6).kmwSubstr(0,2)', "𓅌𓂜");
+print('strSupp.kmwSubstr(-30)', strSupp);
 
 /*------------------------------------------------------------------------------------------*/
 /* kmwSubstring test                                                                        */
@@ -162,10 +227,14 @@ var strBMP = "Mozilla";
 var strSMP = "Moz𓀧𓅌𓂜𓏐𓊺Text"; 
 
 // Displays "Moz"
-/*print('strBMP.substring(0,3)', "Moz");
+print('strBMP.substring(0,3)', "Moz");
 print('strBMP.substring(3,0)', "Moz");
 print('strBMP.kmwSubstring(0,3)', "Moz");
 print('strBMP.kmwSubstring(3,0)', "Moz");
+print('strBMP.substring(4)','lla');
+print('strBMP.kmwSubstring(4)','lla');
+print('strBMP.substring(7)','');
+print('strBMP.kmwSubstring(7)','');
 
 // Displays "lla"
 print('strBMP.substring(4,7)', "lla");
@@ -180,7 +249,7 @@ print('strBMP.kmwSubstring(0,6)', "Mozill");
 // Displays "Mozilla"
 print('strBMP.substring(0,7)', "Mozilla");
 print('strBMP.substring(0,10)', "Mozilla");
-print('strBMP.kmwSubstring(0,7)', "Mozilla");*/
+print('strBMP.kmwSubstring(0,7)', "Mozilla"); //to here
 print('strBMP.kmwSubstring(0,10)', "Mozilla");
 
 // Displays "Moz"

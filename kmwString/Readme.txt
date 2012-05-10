@@ -1,4 +1,4 @@
-kmwStrings 0.1
+kmwStrings 0.2
 
 Adds functions to treat supplementary plane characters in the same 
 way as basic multilingual plane characters in JavaScript.
@@ -12,4 +12,11 @@ Twitter: @marcdurdin
 Change History
 ==============
 
-27 April 2012: Initial release
+2012-05-11 - mcd - Version 0.2
+                 - Fixed kmwSubstring when only 1 parameter passed
+                 - Fixed kmwCodePointToCodeUnit for end-of-string indices
+                 - Added kmwCodeUnitToCodePoint
+                 - Added kmwCharAt
+                 - Added additional tests for each of the fixes and additions
+
+2012-04-27 - mcd - Version 0.1

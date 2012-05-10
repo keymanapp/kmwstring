@@ -4,7 +4,7 @@
   Adds functions to treat supplementary plane characters in the same 
   way as basic multilingual plane characters in JavaScript.
   
-  Version 0.1
+  Version 0.2
   
   License
   
@@ -34,16 +34,16 @@ String.kmwFromCharCode = function() {
   var chars = [], i;
   for (i = 0; i < arguments.length; i++) {
     var c = Number(arguments[i]);
-	if (!isFinite(c) || c < 0 || c > 0x10FFFF || Math.floor(c) !== c) {
-	  throw new RangeError("Invalid code point " + c);
-	}
-	if (c < 0x10000) {
-	  chars.push(c);
-	} else {
-	  c -= 0x10000;
-	  chars.push((c >> 10) + 0xD800);
-	  chars.push((c % 0x400) + 0xDC00);
-	}
+    if (!isFinite(c) || c < 0 || c > 0x10FFFF || Math.floor(c) !== c) {
+      throw new RangeError("Invalid code point " + c);
+    }
+    if (c < 0x10000) {
+      chars.push(c);
+    } else {
+      c -= 0x10000;
+      chars.push((c >> 10) + 0xD800);
+      chars.push((c % 0x400) + 0xDC00);
+    }
   }
   return String.fromCharCode.apply(undefined, chars);
 }
@@ -66,15 +66,15 @@ String.prototype.kmwCharCodeAt = function(codePointIndex) {
 
   for(var i = 0; i < codePointIndex; i++) {
     codeUnitIndex = str.kmwNextChar(codeUnitIndex);
-	if(codeUnitIndex == undefined) return NaN;
+    if(codeUnitIndex == undefined) return NaN;
   }
   
   var first = str.charCodeAt(codeUnitIndex);
   if (first >= 0xD800 && first <= 0xDBFF && str.length > codeUnitIndex + 1) {
     var second = str.charCodeAt(codeUnitIndex + 1);
-	if (second >= 0xDC00 && second <= 0xDFFF) {
-	  return ((first - 0xD800) << 10) + (second - 0xDC00) + 0x10000;
-	}
+    if (second >= 0xDC00 && second <= 0xDFFF) {
+      return ((first - 0xD800) << 10) + (second - 0xDC00) + 0x10000;
+    }
   }
   return first;  
 }
@@ -171,9 +171,9 @@ String.prototype.kmwSubstr = function(start, length)
   if(start < 0)
   {
     start = str.kmwLength() + start;
-	if(start < 0) {
-	  start = 0;
-	}
+    if(start < 0) {
+      start = 0;
+    }
   }
   var startCodeUnit = str.kmwCodePointToCodeUnit(start);
   var endCodeUnit = startCodeUnit;
@@ -198,12 +198,21 @@ String.prototype.kmwSubstr = function(start, length)
  */
 String.prototype.kmwSubstring = function(indexA, indexB)
 {
-  var str = String(this);
+  var str = String(this),indexACodeUnit,indexBCodeUnit;
   
-  if(indexA > indexB) { var c = indexA; indexA = indexB; indexB = c; }
+  if(typeof(indexB) == 'undefined') 
+  {
+    indexACodeUnit = str.kmwCodePointToCodeUnit(indexA);
+    indexBCodeUnit = str.length;
+  } 
+  else
+  {
+    if(indexA > indexB) { var c = indexA; indexA = indexB; indexB = c; }
   
-  var indexACodeUnit = str.kmwCodePointToCodeUnit(indexA);
-  var indexBCodeUnit = str.kmwCodePointToCodeUnit(indexB);
+    indexACodeUnit = str.kmwCodePointToCodeUnit(indexA);
+    indexBCodeUnit = str.kmwCodePointToCodeUnit(indexB);
+  }
+  if(isNaN(indexACodeUnit)) indexACodeUnit = 0;
   if(isNaN(indexBCodeUnit)) indexBCodeUnit = str.length;
 
   return str.substring(indexACodeUnit, indexBCodeUnit);
@@ -231,12 +240,12 @@ String.prototype.kmwNextChar = function(codeUnitIndex) {
   var first = str.charCodeAt(codeUnitIndex);
   if (first >= 0xD800 && first <= 0xDBFF && str.length > codeUnitIndex + 1) {
     var second = str.charCodeAt(codeUnitIndex + 1);
-	if (second >= 0xDC00 && second <= 0xDFFF) {
-	  if(codeUnitIndex == str.length - 2) {
-	    return undefined;
-	  }
-	  return codeUnitIndex + 2;
-	}
+    if (second >= 0xDC00 && second <= 0xDFFF) {
+      if(codeUnitIndex == str.length - 2) {
+        return undefined;
+      }
+      return codeUnitIndex + 2;
+    }
   }
   return codeUnitIndex + 1;
 }
@@ -259,9 +268,9 @@ String.prototype.kmwPrevChar = function(codeUnitIndex) {
   var second = str.charCodeAt(codeUnitIndex - 1);
   if (second >= 0xDC00 && first <= 0xDFFF && codeUnitIndex > 1) {
     var first = str.charCodeAt(codeUnitIndex - 2);
-	if (first >= 0xD800 && second <= 0xDBFF) {
-	  return codeUnitIndex - 2;
-	}
+    if (first >= 0xD800 && second <= 0xDBFF) {
+      return codeUnitIndex - 2;
+    }
   }
   return codeUnitIndex - 1;
 }
@@ -280,12 +289,43 @@ String.prototype.kmwCodePointToCodeUnit = function(codePointIndex) {
   if(codePointIndex < 0) {
     codeUnitIndex = str.length;
     for(var i = 0; i > codePointIndex; i--, 
-	  codeUnitIndex = str.kmwPrevChar(codeUnitIndex));	
+      codeUnitIndex = str.kmwPrevChar(codeUnitIndex)); 
     return codeUnitIndex;
   }
+  
+  if(codePointIndex == str.kmwLength()) return str.length;
 
   for(var i = 0; i < codePointIndex; i++,
     codeUnitIndex = str.kmwNextChar(codeUnitIndex));
   return codeUnitIndex;
+}
+
+/**
+ * Returns the corresponding code point index to the code unit index passed
+ *
+ * @param  {integer} codeUnitIndex  A code unit index in the string
+ * @return {integer}                The corresponding code point index
+*/
+String.prototype.kmwCodeUnitToCodePoint = function(codeUnitIndex) {
+  var str = String(this);
+  
+  if(codeUnitIndex == 0)
+    return 0;
+  else if(codeUnitIndex < 0)     
+    return str.substr(codeUnitIndex).kmwLength();
+  else
+    return str.substr(0,codeUnitIndex).kmwLength();
+}
+
+/**
+ * Returns the character at a the code point index passed
+ *
+ * @param  {integer} codePointIndex  A code point index in the string
+ * @return {string}                  The corresponding character
+*/
+String.prototype.kmwCharAt = function(codePointIndex) {
+  var str = String(this);
+  
+  if(codePointIndex >= 0) return str.kmwSubstr(codePointIndex,1); else return '';
 }
 
