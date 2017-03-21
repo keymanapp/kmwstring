@@ -1,4 +1,4 @@
 keyman-tools
 ============
 
-Official location of open source projects from Tavultesoft
+Open source tools and projects related to Keyman
